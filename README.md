@@ -1,15 +1,9 @@
 # 🩺 Heart Disease Diagnostic Engine
 **Figure 01 · Machine Learning · Healthcare**
 
-A comparative study and client-side deployment of a cardiovascular risk stratification system trained on the UCI Cleveland Heart Disease Dataset.
+A comparative study of cardiovascular risk classification trained on the UCI Cleveland Heart Disease Dataset.
 
 > ⚠️ **Disclaimer:** For educational and research use only. Trained on 1988 data. Not FDA-cleared or clinically validated. Must not replace evaluation by a qualified medical professional.
-
----
-
-## 📌 Overview
-
-This project benchmarks three classification algorithms on a clinical dataset, selects the optimal model based on interpretability and calibration requirements in healthcare, then deploys it as a **serverless, client-side inference engine** with zero infrastructure cost.
 
 ---
 
@@ -21,12 +15,13 @@ This project benchmarks three classification algorithms on a clinical dataset, s
 | Samples | 304 |
 | Features | 11 clinical parameters |
 | Target | Binary — presence vs. absence of heart disease |
-| Missing Values | 6 (imputed via median) |
+| Missing Values | 1 (slope — imputed via mode) |
 
 **Preprocessing pipeline:**
-- Median imputation for missing values
-- Z-score normalization (standardization) — improved LR accuracy by ~6pp
-- One-hot encoding for categorical variables
+- `ca` and `thal` dropped due to high missingness
+- Ordinal encoding for categorical variables (cp, restecg, slope)
+- Binary encoding for sex, fbs, exang
+- Z-score normalization (StandardScaler) — improved Logistic Regression accuracy by ~6pp
 - Stratified 80/20 train-test split + 5-fold cross-validation
 
 ---
@@ -35,11 +30,11 @@ This project benchmarks three classification algorithms on a clinical dataset, s
 
 | Algorithm | Test Accuracy | ROC-AUC | F1-Score | Notes |
 |---|---|---|---|---|
-| **Random Forest** | 90% | 0.96 | 0.90 | Highest raw accuracy; less interpretable |
-| **Logistic Regression** | 87% | 0.95 | 0.86 | ✅ **Deployed** |
-| Decision Tree | 80% | 0.83 | 0.79 | Overfits — 100% train vs 71% test (unpruned) |
+| **Random Forest** | 90.16% | 0.9535 | 0.8966 | Highest raw accuracy; less interpretable |
+| **Logistic Regression** | 86.89% | 0.9502 | 0.8621 | ✅ **Selected** |
+| Decision Tree | 80.33% | 0.8317 | 0.7931 | Overfits — 100% train vs 71% test (unpruned) |
 
-**Deployment rationale:** Logistic Regression was selected over Random Forest despite a 3% accuracy gap. In a clinical context, coefficient-level explainability and well-calibrated probability outputs are non-negotiable. Random Forest operates as a black box — unacceptable when decisions affect patient outcomes.
+**Why Logistic Regression over Random Forest:** In a clinical context, coefficient-level explainability and well-calibrated probability outputs are non-negotiable. A 3% accuracy gain does not justify a black box when decisions affect patient outcomes. Hyperparameter tuning via GridSearchCV selected C=0.01 as the optimal regularization strength.
 
 ---
 
@@ -47,39 +42,17 @@ This project benchmarks three classification algorithms on a clinical dataset, s
 
 | # | Feature | Role | Coefficient (β) |
 |---|---|---|---|
-| 1 | Age | Input | — |
-| 2 | Biological Sex | Risk factor | +0.626 |
-| 3 | Chest Pain Type | Risk factor | +0.586 |
-| 4 | Resting BP (mmHg) | Input | — |
-| 5 | Cholesterol (mg/dL) | Input | — |
-| 6 | Fasting Blood Sugar >120 mg/dL | Input | — |
-| 7 | Resting ECG | Input | — |
-| 8 | Max Heart Rate Achieved | Protective factor | −0.336 |
-| 9 | Exercise-Induced Angina | Input | — |
-| 10 | ST Depression (mm) | Input | — |
-| 11 | Peak Exercise ST Slope | Input | — |
-
----
-
-## 🚀 Deployment Architecture
-
-```
-Training (Python / Scikit-learn)
-        │
-        ▼
-  Model Weights Serialized
-  to JavaScript Object
-        │
-        ▼
-  Client-Side Inference (JS)
-  ┌─────────────────────────┐
-  │  Inference time: <1ms   │
-  │  Server cost:    $0     │
-  │  Offline-capable: ✅    │
-  └─────────────────────────┘
-```
-
-Trained weights and intercept are exported from Python and embedded directly in the browser — no backend, no API, no latency.
+| 1 | Age | Input | +0.1770 |
+| 2 | Biological Sex | Risk factor | +0.6257 |
+| 3 | Chest Pain Type | Risk factor | +0.5860 |
+| 4 | Resting BP (mmHg) | Input | +0.1871 |
+| 5 | Cholesterol (mg/dL) | Input | +0.1418 |
+| 6 | Fasting Blood Sugar >120 mg/dL | Input | −0.0429 |
+| 7 | Resting ECG | Input | +0.1921 |
+| 8 | Max Heart Rate Achieved | Protective factor | −0.3364 |
+| 9 | Exercise-Induced Angina | Input | +0.3381 |
+| 10 | ST Depression (mm) | Input | +0.3934 |
+| 11 | Peak Exercise ST Slope | Input | +0.1894 |
 
 ---
 
@@ -94,6 +67,12 @@ heart-disease-diagnostic-engine/
 ├── notebooks/
 │   └── 01.ipynb
 │
+├── assets/
+│   ├── eda_plots.png
+│   ├── confusion_matrices.png
+│   ├── roc_curves.png
+│   └── feature_importance.png
+│
 ├── requirements.txt
 ├── .gitignore
 ├── LICENSE
@@ -104,26 +83,28 @@ heart-disease-diagnostic-engine/
 
 ## 🛠️ Stack
 
-`Python` · `Scikit-learn` · `pandas` · `NumPy` · `JavaScript`
-
----
-
-## 💡 Key Learnings
-
-1. **Feature quality beats model complexity** — on small datasets (~300 samples), normalization and encoding matter more than algorithm depth.
-2. **Interpretability is a hard constraint in healthcare** — a 3% accuracy gain is not worth losing coefficient-level attribution.
-3. **Bias-variance trade-off is textbook here** — unconstrained Decision Trees scored 100% training accuracy and 71% test; regularization is mandatory.
+`Python` · `Scikit-learn` · `pandas` · `NumPy` · `Matplotlib` · `Seaborn`
 
 ---
 
 ## 🏃 Quickstart
 
 ```bash
-git clone https://github.com/<your-username>/heart-disease-diagnostic-engine.git
+git clone https://github.com/TanishMohan-tm/heart-disease-diagnostic-engine.git
 cd heart-disease-diagnostic-engine
 pip install -r requirements.txt
-jupyter notebook notebooks/01_heart_disease.ipynb
+jupyter notebook notebooks/01.ipynb
 ```
+
+Running the notebook end-to-end will generate the 4 evaluation plots saved to the project root.
+
+---
+
+## 💡 Key Learnings
+
+1. **Feature quality beats model complexity** — on 304 samples, normalization and encoding matter more than algorithm depth.
+2. **Interpretability is a hard constraint in healthcare** — a 3% accuracy gain is not worth losing coefficient-level attribution.
+3. **Bias-variance trade-off is textbook here** — unconstrained Decision Trees scored 100% training accuracy and 71% test; regularization is mandatory.
 
 ---
 
