@@ -89,20 +89,14 @@ Trained weights and intercept are exported from Python and embedded directly in 
 heart-disease-diagnostic-engine/
 │
 ├── data/
-│   └── heart_disease_uci.csv          # Raw UCI dataset
+│   └── heart_disease_uci.csv
 │
 ├── notebooks/
-│   └── 01_heart_disease.ipynb         # Full training, evaluation & export pipeline
-│
-├── inference/
-│   └── inference.js                   # Client-side inference engine (serialized weights)
-│
-├── assets/
-│   ├── confusion_matrix.png           # Evaluation plots
-│   └── roc_curve.png
+│   └── 01.ipynb
 │
 ├── requirements.txt
 ├── .gitignore
+├── LICENSE
 └── README.md
 ```
 
