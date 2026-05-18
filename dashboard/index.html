@@ -225,6 +225,7 @@
         .result-panel {
             position: sticky;
             top: 24px;
+            align-self: start;
         }
 
         .gauge-wrap {
@@ -460,6 +461,23 @@
             color: var(--text-secondary);
             font-weight: 500;
         }
+
+        .inputs-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .inputs-grid h3 {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 800px) {
+            .inputs-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
     <base target="_blank">
 </head>
@@ -536,8 +554,8 @@
                     <!-- INPUTS -->
                     <div class="card">
                         <h3>Patient Information</h3>
-
-                        <div class="input-group">
+                        <div class="inputs-grid">
+                            <div class="input-group">
                             <label>Age <span class="value-display" id="ageVal">54</span></label>
                             <input type="range" id="age" min="28" max="77" value="54"
                                 oninput="updateVal('age','ageVal'); calculate()">
@@ -660,6 +678,7 @@
                                 exercise shows how blood flow changes. Downsloping is worrying. <strong>For
                                     clinicians:</strong> Downsloping ST segment during peak exercise is a hallmark of
                                 transmural ischemia.</div>
+                            </div>
                         </div>
                     </div>
 
