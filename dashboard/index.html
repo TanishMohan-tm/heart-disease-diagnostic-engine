@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Heart Disease Risk Explorer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg: #FAFAF8;
+            --surface: #FFFFFF;
+            --card: #F5F5F0;
+            --border: #E8E8E3;
+            --text: #1A1A1A;
+            --text-secondary: #4A4A48;
+            --text-muted: #8A8A85;
+            --accent: #C75B5B;
+            --accent-soft: rgba(199, 91, 91, 0.08);
+            --protect: #5B9A6B;
+            --protect-soft: rgba(91, 154, 107, 0.08);
+            --warn: #C9A227;
+            --serif: 'Crimson Pro', Georgia, serif;
+            --sans: 'Inter', system-ui, sans-serif;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 15px;
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1,
+        h2,
+        h3,
+        .serif {
+            font-family: var(--serif);
+            font-weight: 400;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: 2.6rem;
+            line-height: 1.15;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 0.5em;
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            margin-bottom: 0.4em;
+        }
+
+        p {
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            padding: 48px 0 32px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 48px;
+        }
+
+        header h1 {
+            margin-bottom: 12px;
+        }
+
+        header .subtitle {
+            font-family: var(--serif);
+            font-style: italic;
+            font-size: 1.15rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 28px;
+            margin-bottom: 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 1.9rem;
+            }
+        }
+
+        .section {
+            margin-bottom: 56px;
+        }
+
+        .section-title {
+            font-family: var(--serif);
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+        }
+
+        .section-subtitle {
+            color: var(--text-muted);
+            margin-bottom: 28px;
+            font-size: 0.95rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .input-group .hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            border-radius: 2px;
+            background: var(--border);
+            outline: none;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--text);
+            cursor: pointer;
+            border: 3px solid var(--surface);
+            box-shadow: 0 1px 4px rgba(0, 0, 0, 0.15);
+        }
+
+        select {
+            width: 100%;
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 0.9rem;
+            cursor: pointer;
+            outline: none;
+        }
+
+        .toggle-group {
+            display: flex;
+            gap: 8px;
+        }
+
+        .toggle-btn {
+            flex: 1;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--text-secondary);
+            font-family: var(--sans);
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .toggle-btn.active {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+        }
+
+        .value-display {
+            float: right;
+            font-family: var(--serif);
+            font-size: 1.1rem;
+            color: var(--text);
+        }
+
+        .result-panel {
+            position: sticky;
+            top: 24px;
+        }
+
+        .gauge-wrap {
+            text-align: center;
+            padding: 16px 0 8px;
+        }
+
+        .gauge-svg {
+            width: 280px;
+            height: 160px;
+            display: block;
+            margin: 0 auto;
+        }
+
+        .risk-percentage {
+            font-family: var(--serif);
+            font-size: 3.2rem;
+            color: var(--text);
+            line-height: 1;
+            margin: 4px 0;
+        }
+
+        .risk-label {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin: 12px 0 8px;
+        }
+
+        .risk-low {
+            background: var(--protect-soft);
+            color: var(--protect);
+        }
+
+        .risk-med {
+            background: rgba(201, 162, 39, 0.1);
+            color: #8A6D0B;
+        }
+
+        .risk-high {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .explanation-list {
+            margin-top: 16px;
+        }
+
+        .explanation-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 6px;
+        }
+
+        .explanation-item:hover {
+            background: var(--card);
+        }
+
+        .explanation-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            margin-top: 5px;
+            flex-shrink: 0;
+        }
+
+        .explanation-content {
+            flex: 1;
+        }
+
+        .explanation-title {
+            font-weight: 600;
+            font-size: 0.88rem;
+            margin-bottom: 3px;
+        }
+
+        .explanation-desc {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+        }
+
+        .explanation-impact {
+            font-family: var(--serif);
+            font-size: 0.9rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            white-space: nowrap;
+            margin-top: 2px;
+        }
+
+        .feature-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 12px;
+        }
+
+        .feature-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .feature-rank {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--serif);
+            font-size: 0.9rem;
+            font-weight: 600;
+            flex-shrink: 0;
+        }
+
+        .rank-risk {
+            background: var(--accent-soft);
+            color: var(--accent);
+        }
+
+        .rank-protect {
+            background: var(--protect-soft);
+            color: var(--protect);
+        }
+
+        .feature-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        .feature-bar-track {
+            height: 6px;
+            background: var(--card);
+            border-radius: 3px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .feature-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 0.6s ease;
+        }
+
+        .feature-value {
+            font-family: var(--serif);
+            font-size: 1rem;
+            text-align: right;
+        }
+
+        .feature-explanation {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .for-patient {
+            font-size: 0.88rem;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+
+        .for-doctor {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            line-height: 1.5;
+            font-style: italic;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .comparison-table th {
+            text-align: left;
+            padding: 12px;
+            font-weight: 600;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            color: var(--text-muted);
+            border-bottom: 2px solid var(--border);
+        }
+
+        .comparison-table td {
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .comparison-table tr.selected {
+            background: var(--accent-soft);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            background: var(--card);
+            color: var(--text-secondary);
+        }
+
+        .badge-winner {
+            background: var(--protect-soft);
+            color: var(--protect);
+        }
+
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 32px 0;
+            margin-top: 48px;
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .hint strong {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+    </style>
+    <base target="_blank">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <<header>
+            <h1>Heart Disease Risk Explorer</h1>
+            <p class="subtitle">Understand what drives cardiovascular risk — explained for everyone</p>
+            </header>
+
+            <!-- WHY THIS MODEL -->
+            <div class="section">
+                <h2 class="section-title">Why this model?</h2>
+                <p class="section-subtitle">Three algorithms tested. The most accurate wasn't chosen.</p>
+
+                <div class="card">
+                    <table class="comparison-table">
+                        <thead>
+                            <tr>
+                                <th>Algorithm</th>
+                                <th>Accuracy</th>
+                                <th>ROC-AUC</th>
+                                <th>F1-Score</th>
+                                <th>Why it was / wasn't chosen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Random Forest</td>
+                                <td>90.16%</td>
+                                <td>0.9535</td>
+                                <td>0.8966</td>
+                                <td>Most accurate, but a "black box" — can't explain why it predicts what it does</td>
+                            </tr>
+                            <tr class="selected">
+                                <td><strong>Logistic Regression</strong></td>
+                                <td><strong>86.89%</strong></td>
+                                <td><strong>0.9502</strong></td>
+                                <td><strong>0.8621</strong></td>
+                                <td><span class="badge badge-winner">Selected</span> Every feature has a clear,
+                                    measurable weight. You can see exactly what drives the risk.</td>
+                            </tr>
+                            <tr>
+                                <td>Decision Tree</td>
+                                <td>80.33%</td>
+                                <td>0.8317</td>
+                                <td>0.7931</td>
+                                <td>Memorized training data (100%) but failed on new patients (71%) — overfitting</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- WHAT DRIVES RISK -->
+            <div class="section">
+                <h2 class="section-title">What drives heart disease risk?</h2>
+                <p class="section-subtitle">11 factors the model learned from 304 patients. Each explanation has two
+                    levels — pick the one that fits you.</p>
+
+                <div id="featureCards"></div>
+            </div>
+
+            <!-- LIVE CALCULATOR -->
+            <div class="section">
+                <h2 class="section-title">Live Risk Calculator</h2>
+                <p class="section-subtitle">Adjust the values. The model updates instantly — everything happens in your
+                    browser.</p>
+
+                <div class="grid-2">
+                    <!-- INPUTS -->
+                    <div class="card">
+                        <h3>Patient Information</h3>
+
+                        <div class="input-group">
+                            <label>Age <span class="value-display" id="ageVal">54</span></label>
+                            <input type="range" id="age" min="28" max="77" value="54"
+                                oninput="updateVal('age','ageVal'); calculate()">
+                            <div class="hint">As we age, arteries naturally stiffen and cholesterol plaque builds up.
+                                Risk rises after 45 (men) and 55 (women).</div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Biological Sex</label>
+                            <div class="toggle-group">
+                                <button class="toggle-btn active" id="sexM" onclick="setSex(1)">Male</button>
+                                <button class="toggle-btn" id="sexF" onclick="setSex(0)">Female</button>
+                            </div>
+                            <div class="hint"><strong>For patients:</strong> Men typically have higher risk earlier in
+                                life. <strong>For clinicians:</strong> OR ~2.0 in this dataset, likely hormonally
+                                mediated.</div>
+                        </div>
+
+                        <h3 style="margin-top: 28px;">Symptoms & Tests</h3>
+
+                        <div class="input-group">
+                            <label>Chest Pain Type</label>
+                            <select id="cp" onchange="calculate()">
+                                <option value="0">Typical Angina — chest pain during exertion, relieved by rest</option>
+                                <option value="1">Atypical Angina — chest pain not clearly linked to exertion</option>
+                                <option value="2" selected>Non-Anginal — chest discomfort not from the heart</option>
+                                <option value="3">Asymptomatic — no chest pain at all</option>
+                            </select>
+                            <div class="hint"><strong>For patients:</strong> "No pain" sounds good, but silent heart
+                                disease is often the most dangerous — pain nerves may be damaged. <strong>For
+                                    clinicians:</strong> Asymptomatic presentation associated with diabetic neuropathy
+                                and advanced disease.</div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Resting Blood Pressure <span class="value-display" id="bpVal">131</span> mmHg</label>
+                            <input type="range" id="trestbps" min="94" max="200" value="131"
+                                oninput="updateVal('trestbps','bpVal'); calculate()">
+                            <div class="hint"><strong>For patients:</strong> High blood pressure forces your heart to
+                                work harder, slowly damaging artery walls. <strong>For clinicians:</strong> Sustained
+                                elevated afterload increases LV mass and accelerates atherosclerosis.</div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Cholesterol <span class="value-display" id="cholVal">250</span> mg/dL</label>
+                            <input type="range" id="chol" min="126" max="564" value="250"
+                                oninput="updateVal('chol','cholVal'); calculate()">
+                            <div class="hint"><strong>For patients:</strong> Cholesterol is a waxy substance that can
+                                clog arteries like grease in a pipe. <strong>For clinicians:</strong> Total cholesterol
+                                proxy; LDL-C would be more specific but unavailable in this 1988 dataset.</div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Fasting Blood Sugar &gt;120 mg/dL?</label>
+                            <div class="toggle-group">
+                                <button class="toggle-btn" id="fbsY" onclick="setFbs(1)">Yes</button>
+                                <button class="toggle-btn active" id="fbsN" onclick="setFbs(0)">No</button>
+                            </div>
+                            <div class="hint"><strong>For patients:</strong> Diabetes damages blood vessels over time.
+                                <strong>For clinicians:</strong> Binary threshold is crude; HbA1c would be preferred.
+                                Weak predictive power in this model (coef −0.04).</div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Resting ECG</label>
+                            <select id="restecg" onchange="calculate()">
+                                <option value="0" selected>Normal — heart rhythm looks healthy</option>
+                                <option value="1">ST-T Abnormality — possible reduced blood flow</option>
+                                <option value="2">LV Hypertrophy — heart wall thickened from overwork</option>
+                            </select>
+                            <div class="hint"><strong>For patients:</strong> An ECG measures the electrical signals in
+                                your heart. Abnormal patterns can indicate damage or strain. <strong>For
+                                    clinicians:</strong> ST-T changes suggest ischemia; LVH indicates chronic pressure
+                                overload.</div>
+                        </div>
+
+                        <h3 style="margin-top: 28px;">Exercise Stress Test</h3>
+
+                        <div class="input-group">
+                            <label>Max Heart Rate <span class="value-display" id="hrVal">150</span> bpm</label>
+                            <input type="range" id="thalach" min="71" max="202" value="150"
+                                oninput="updateVal('thalach','hrVal'); calculate()">
+                            <div class="hint"><strong>For patients:</strong> A higher max heart rate during exercise
+                                means your heart is fit and can handle stress. This is <strong>protective</strong>.
+                                <strong>For clinicians:</strong> Inversely correlated with cardiovascular fitness and
+                                absence of flow-limiting lesions.</div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Exercise-Induced Angina?</label>
+                            <div class="toggle-group">
+                                <button class="toggle-btn" id="exangY" onclick="setExang(1)">Yes — chest pain during
+                                    exercise</button>
+                                <button class="toggle-btn active" id="exangN" onclick="setExang(0)">No</button>
+                            </div>
+                            <div class="hint"><strong>For patients:</strong> If your heart hurts when you exercise, it
+                                means it isn't getting enough oxygen. This is a <strong>major warning sign</strong>.
+                                <strong>For clinicians:</strong> Classic exertional angina indicates flow-limiting
+                                coronary stenosis.</div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>ST Depression <span class="value-display" id="opVal">1.0</span> mm</label>
+                            <input type="range" id="oldpeak" min="0" max="6.2" step="0.1" value="1.0"
+                                oninput="updateVal('oldpeak','opVal'); calculate()">
+                            <div class="hint"><strong>For patients:</strong> This measures how much your heart
+                                "struggles" during exercise on an ECG. Higher = more concern. <strong>For
+                                    clinicians:</strong> ST-segment depression reflects subendocardial ischemia during
+                                stress. &gt;2mm is significant.</div>
+                        </div>
+
+                        <div class="input-group">
+                            <label>Peak Exercise ST Slope</label>
+                            <select id="slope" onchange="calculate()">
+                                <option value="0">Upsloping — heart handles stress well</option>
+                                <option value="1" selected>Flat — borderline, reduced blood flow</option>
+                                <option value="2">Downsloping — indicates ischemia under stress</option>
+                            </select>
+                            <div class="hint"><strong>For patients:</strong> The direction of the ECG curve during peak
+                                exercise shows how blood flow changes. Downsloping is worrying. <strong>For
+                                    clinicians:</strong> Downsloping ST segment during peak exercise is a hallmark of
+                                transmural ischemia.</div>
+                        </div>
+                    </div>
+
+                    <!-- RESULTS -->
+                    <div class="result-panel">
+                        <div class="card">
+                            <div class="gauge-wrap">
+                                <div
+                                    style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--text-muted); margin-bottom: 12px;">
+                                    Estimated Risk of Heart Disease</div>
+
+                                <!-- SINGLE CLEAN GAUGE -->
+                                <svg class="gauge-svg" viewBox="0 0 280 165">
+                                    <defs>
+                                        <filter id="gShadow" x="-50%" y="-50%" width="200%" height="200%">
+                                            <feDropShadow dx="0" dy="2" stdDeviation="3"
+                                                flood-color="rgba(0,0,0,0.08)" />
+                                        </filter>
+                                        <linearGradient id="zoneGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                                            <stop offset="0%" stop-color="var(--protect)" />
+                                            <stop offset="35%" stop-color="var(--protect)" />
+                                            <stop offset="35%" stop-color="var(--warn)" />
+                                            <stop offset="60%" stop-color="var(--warn)" />
+                                            <stop offset="60%" stop-color="var(--accent)" />
+                                            <stop offset="100%" stop-color="var(--accent)" />
+                                        </linearGradient>
+                                    </defs>
+
+                                    <!-- Background track -->
+                                    <path d="M 40 130 A 100 100 0 0 1 240 130" fill="none" stroke="var(--card)"
+                                        stroke-width="16" stroke-linecap="round" filter="url(#gShadow)" />
+
+                                    <!-- Colored risk zones (single clean gradient) -->
+                                    <path d="M 40 130 A 100 100 0 0 1 240 130" fill="none" stroke="url(#zoneGrad)"
+                                        stroke-width="16" stroke-linecap="round" opacity="0.35" />
+
+                                    <!-- Tick marks -->
+                                    <g id="gaugeTicks"></g>
+
+                                    <!-- Value arc (animated) -->
+                                    <path id="gaugeArc" d="M 40 130 A 100 100 0 0 1 240 130" fill="none"
+                                        stroke="var(--text)" stroke-width="16" stroke-linecap="round"
+                                        style="transition: stroke-dasharray 0.7s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.3s ease;" />
+
+                                    <!-- Needle -->
+                                    <g id="gaugeNeedle"
+                                        style="transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); transform-origin: 140px 130px;">
+                                        <line x1="140" y1="130" x2="140" y2="38" stroke="var(--text)" stroke-width="3"
+                                            stroke-linecap="round" />
+                                        <circle cx="140" cy="130" r="7" fill="var(--surface)" stroke="var(--text)"
+                                            stroke-width="2.5" />
+                                        <circle cx="140" cy="130" r="3" fill="var(--text)" />
+                                    </g>
+
+                                    <!-- Scale labels -->
+                                    <text x="40" y="155" text-anchor="middle" font-size="12" fill="var(--text-muted)"
+                                        font-family="var(--sans)" font-weight="600">0%</text>
+                                    <text x="90" y="155" text-anchor="middle" font-size="11" fill="var(--text-muted)"
+                                        font-family="var(--sans)" font-weight="500">25%</text>
+                                    <text x="140" y="155" text-anchor="middle" font-size="12" fill="var(--text-muted)"
+                                        font-family="var(--sans)" font-weight="600">50%</text>
+                                    <text x="190" y="155" text-anchor="middle" font-size="11" fill="var(--text-muted)"
+                                        font-family="var(--sans)" font-weight="500">75%</text>
+                                    <text x="240" y="155" text-anchor="middle" font-size="12" fill="var(--text-muted)"
+                                        font-family="var(--sans)" font-weight="600">100%</text>
+                                </svg>
+
+                                <div class="risk-percentage" id="riskPct">--%</div>
+                                <div class="risk-label risk-low" id="riskLabel">Enter values to calculate</div>
+                            </div>
+
+                            <div style="margin-top: 24px;">
+                                <div
+                                    style="font-size: 0.72rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.1em; color: var(--text-muted); margin-bottom: 14px;">
+                                    Why this result?</div>
+                                <div id="explanationList"></div>
+                            </div>
+
+                            <div
+                                style="margin-top: 20px; padding: 16px; background: var(--card); border-radius: 10px; font-size: 0.78rem; color: var(--text-muted); line-height: 1.6;">
+                                <strong style="color: var(--text-secondary);">Educational tool only.</strong> Trained on
+                                1988 UCI Cleveland data (n=304). Not FDA-cleared. Not a substitute for professional
+                                medical evaluation.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <<footer>
+                <p>Built by TanishMohan-tm · UCI Cleveland Heart Disease Dataset (1988) · Logistic Regression · 86.89%
+                    accuracy · 0.9502 AUC</p>
+                <p style="margin-top: 4px;">MIT License · For educational and research use only</p>
+                </footer>
+
+    </div>
+
+    <script>
+        // ── MODEL DATA ──
+        const MODEL = {
+            intercept: -0.2087,
+            weights: [0.1770, 0.6257, 0.5860, 0.1871, 0.1418, -0.0429, 0.1921, -0.3364, 0.3381, 0.3934, 0.1894],
+            means: [54.4239, 0.679, 2.144, 131.0823, 250.5021, 0.1481, 0.9671, 149.8807, 0.3251, 0.9926, 0.5844],
+            stds: [8.9795, 0.4669, 0.9686, 17.523, 52.571, 0.3552, 0.9974, 22.7344, 0.4684, 1.1199, 0.612]
+        };
+
+        const FEATURES = [
+            { name: 'Age', idx: 0, risk: true, patientText: 'As we get older, our arteries naturally stiffen and cholesterol plaque builds up over decades — like rust in a pipe. Each decade adds a small but steady increase in risk.', doctorText: 'Coefficient +0.177. Age is a non-modifiable risk factor. Arterial compliance decreases and intimal thickening progresses with chronological age. Effect is linear in this model.', icon: '🎂' },
+            { name: 'Biological Sex', idx: 1, risk: true, patientText: 'Men in this dataset had about twice the heart disease rate of women. This is partly hormonal (estrogen is protective) and partly lifestyle patterns in the 1980s data.', doctorText: 'Coefficient +0.626 — strongest predictor. Male sex carries OR ~2.0. Likely multifactorial: lower HDL, higher visceral adiposity, and androgen-mediated lipid profiles in this cohort.', icon: '⚤' },
+            { name: 'Chest Pain Type', idx: 2, risk: true, patientText: 'Surprisingly, having NO chest pain (asymptomatic) was the most dangerous pattern. Silent heart disease often means advanced damage where pain nerves are already destroyed.', doctorText: 'Coefficient +0.586. Asymptomatic angina (value 3) is weighted highest. Suggests autonomic neuropathy or longstanding ischemic preconditioning masking typical presentation.', icon: '💔' },
+            { name: 'ST Depression', idx: 9, risk: true, patientText: 'This measures how much your heart "struggles" during exercise on an ECG. More than 2mm is serious — it means blood flow to the heart muscle is significantly reduced under stress.', doctorText: 'Coefficient +0.393. ST-segment depression reflects subendocardial ischemia. >2mm during stress testing is a high-risk finding warranting coronary angiography.', icon: '📉' },
+            { name: 'Exercise Angina', idx: 8, risk: true, patientText: 'If you get chest pain when exercising, your heart is demanding more oxygen than your narrowed arteries can deliver. This is one of the most direct warning signs possible.', doctorText: 'Coefficient +0.338. Exertional angina is the clinical hallmark of flow-limiting coronary stenosis. Positive likelihood ratio for significant CAD is substantial.', icon: '🏃' },
+            { name: 'Resting ECG', idx: 6, risk: true, patientText: 'An ECG measures the electrical "wiring" of your heart. Abnormalities can mean the heart muscle has been damaged, thickened from overwork, or is not getting enough blood.', doctorText: 'Coefficient +0.192. Combines ST-T wave changes (ischemia) and LV hypertrophy (chronic pressure overload). Non-specific alone but contributory in multivariate context.', icon: '〰️' },
+            { name: 'ST Slope', idx: 10, risk: true, patientText: 'The shape of the ECG curve during peak exercise matters. A flat or downward slope suggests the heart is not getting enough blood when working hardest.', doctorText: 'Coefficient +0.189. Downsloping ST segment (value 2) during peak exercise indicates transmural ischemia and is associated with multi-vessel disease.', icon: '📊' },
+            { name: 'Resting BP', idx: 3, risk: true, patientText: 'Chronic high blood pressure is like turning up the water pressure in old pipes — eventually they crack. It damages artery walls and makes the heart work overtime.', doctorText: 'Coefficient +0.187. Sustained hypertension increases shear stress on endothelium, accelerates atherosclerosis, and promotes LV remodeling. JNC-8 threshold is 140/90.', icon: '🩺' },
+            { name: 'Cholesterol', idx: 4, risk: true, patientText: 'Cholesterol is the "gunk" that builds up in artery walls. Think of it like grease accumulating in a drain pipe — slowly narrowing the opening until flow is restricted.', doctorText: 'Coefficient +0.142. Total cholesterol is an imperfect proxy; LDL-C and non-HDL-C would be preferred. Nevertheless correlates with atheroma burden in this cohort.', icon: '🥑' },
+            { name: 'Max Heart Rate', idx: 7, risk: false, patientText: 'A higher maximum heart rate during exercise is GOOD. It means your heart is fit, strong, and can pump efficiently. Better fitness = lower risk. This is your friend.', doctorText: 'Coefficient −0.336 — protective. Inversely associated with cardiovascular fitness and absence of flow-limiting lesions. Chronotropic incompetence is a red flag.', icon: '💪' },
+            { name: 'Fasting Sugar', idx: 5, risk: false, patientText: 'While diabetes is dangerous long-term, this simple yes/no question about blood sugar was not very predictive in this specific dataset. Still worth keeping normal.', doctorText: 'Coefficient −0.043 — weakest predictor. Binary FBS >120 mg/dL is crude; HbA1c would be more informative. Negative sign likely reflects confounding or threshold effect.', icon: '🍬' }
+        ];
+
+        let sexVal = 1, fbsVal = 0, exangVal = 0;
+
+        function sigmoid(x) { return 1 / (1 + Math.exp(-x)); }
+
+        function getFeatures() {
+            return [
+                parseFloat(document.getElementById('age').value),
+                sexVal,
+                parseFloat(document.getElementById('cp').value),
+                parseFloat(document.getElementById('trestbps').value),
+                parseFloat(document.getElementById('chol').value),
+                fbsVal,
+                parseFloat(document.getElementById('restecg').value),
+                parseFloat(document.getElementById('thalach').value),
+                exangVal,
+                parseFloat(document.getElementById('oldpeak').value),
+                parseFloat(document.getElementById('slope').value)
+            ];
+        }
+
+        function predict(features) {
+            let z = MODEL.intercept;
+            const contribs = [];
+            for (let i = 0; i < 11; i++) {
+                const normalized = (features[i] - MODEL.means[i]) / MODEL.stds[i];
+                const contrib = MODEL.weights[i] * normalized;
+                z += contrib;
+                contribs.push({
+                    feature: FEATURES.find(f => f.idx === i),
+                    value: features[i],
+                    contrib: contrib,
+                    weight: MODEL.weights[i]
+                });
+            }
+            return { prob: sigmoid(z), contribs };
+        }
+
+        function updateVal(inputId, displayId) {
+            document.getElementById(displayId).textContent = document.getElementById(inputId).value;
+        }
+
+        function setSex(v) {
+            sexVal = v;
+            document.getElementById('sexM').classList.toggle('active', v === 1);
+            document.getElementById('sexF').classList.toggle('active', v === 0);
+            calculate();
+        }
+
+        function setFbs(v) {
+            fbsVal = v;
+            document.getElementById('fbsY').classList.toggle('active', v === 1);
+            document.getElementById('fbsN').classList.toggle('active', v === 0);
+            calculate();
+        }
+
+        function setExang(v) {
+            exangVal = v;
+            document.getElementById('exangY').classList.toggle('active', v === 1);
+            document.getElementById('exangN').classList.toggle('active', v === 0);
+            calculate();
+        }
+
+        // ── GAUGE ──
+        const R = 100;
+        const CX = 140;
+        const CY = 130;
+        const CIRC = Math.PI * R;
+
+        function drawTicks() {
+            const g = document.getElementById('gaugeTicks');
+            [0, 0.25, 0.5, 0.75, 1].forEach(v => {
+                const a = Math.PI * (1 - v);
+                const x1 = CX + (R - 2) * Math.cos(a);
+                const y1 = CY - (R - 2) * Math.sin(a);
+                const x2 = CX + (R - 12) * Math.cos(a);
+                const y2 = CY - (R - 12) * Math.sin(a);
+                const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+                line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+                line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+                line.setAttribute('stroke', 'var(--text-muted)');
+                line.setAttribute('stroke-width', '2.5');
+                line.setAttribute('stroke-linecap', 'round');
+                line.setAttribute('opacity', '0.6');
+                g.appendChild(line);
+            });
+        }
+
+        function updateGauge(prob) {
+            const arc = document.getElementById('gaugeArc');
+            const needle = document.getElementById('gaugeNeedle');
+            const color = prob < 0.35 ? 'var(--protect)' : prob < 0.6 ? 'var(--warn)' : 'var(--accent)';
+
+            arc.style.strokeDasharray = `${prob * CIRC} ${CIRC}`;
+            arc.style.strokeDashoffset = 0;
+            arc.style.stroke = color;
+
+            const rot = (prob * 180) - 90;
+            needle.style.transform = `rotate(${rot}deg)`;
+            needle.querySelector('line').style.stroke = color;
+            needle.querySelectorAll('circle')[1].style.fill = color;
+        }
+
+        function calculate() {
+            const features = getFeatures();
+            const { prob, contribs } = predict(features);
+            const pct = Math.round(prob * 100);
+
+            document.getElementById('riskPct').textContent = pct + '%';
+            updateGauge(prob);
+
+            const label = document.getElementById('riskLabel');
+            if (prob < 0.35) {
+                label.textContent = 'Low Risk';
+                label.className = 'risk-label risk-low';
+            } else if (prob < 0.6) {
+                label.textContent = 'Moderate Risk';
+                label.className = 'risk-label risk-med';
+            } else {
+                label.textContent = 'High Risk';
+                label.className = 'risk-label risk-high';
+            }
+
+            const sorted = [...contribs].sort((a, b) => Math.abs(b.contrib) - Math.abs(a.contrib)).slice(0, 4);
+            const list = document.getElementById('explanationList');
+
+            list.innerHTML = sorted.map(c => {
+                const isRisk = c.contrib > 0;
+                const color = isRisk ? 'var(--accent)' : 'var(--protect)';
+                const arrow = isRisk ? '↑ Raises risk' : '↓ Lowers risk';
+                const reason = getDynamicReason(c.feature.idx, c.value);
+
+                return `<div class="explanation-item">
+      <div class="explanation-dot" style="background: ${color};"></div>
+      <div class="explanation-content">
+        <div class="explanation-title">${c.feature.name}</div>
+        <div class="explanation-desc">${reason}</div>
+      </div>
+      <div class="explanation-impact" style="color: ${color};">${arrow}</div>
+    </div>`;
+            }).join('');
+        }
+
+        function getDynamicReason(idx, value) {
+            const r = {
+                0: `Age ${value}: ${value > 60 ? 'Advanced age significantly increases risk.' : value > 50 ? 'Middle age — risk beginning to climb.' : 'Younger age — lower baseline risk.'}`,
+                1: value === 1 ? 'Male sex — dataset shows 2× higher disease rates.' : 'Female sex — lower baseline risk in this cohort.',
+                2: value == 3 ? 'No chest pain reported — silent disease is often most advanced.' : value == 0 ? 'Typical angina — classic pattern, identifiable and treatable.' : 'Atypical pain — less directly linked to heart, but still monitored.',
+                3: `BP ${value}: ${value > 140 ? 'Hypertension — chronic damage to artery walls.' : value > 130 ? 'Elevated — approaching hypertensive range.' : 'Within acceptable range.'}`,
+                4: `Cholesterol ${value}: ${value > 240 ? 'High — accelerates plaque buildup significantly.' : value > 200 ? 'Borderline elevated — lifestyle changes recommended.' : 'Desirable range.'}`,
+                5: value === 1 ? 'Elevated fasting glucose — diabetes damages vessels over time.' : 'Normal fasting glucose.',
+                6: value == 0 ? 'Normal ECG — no electrical abnormalities detected.' : value == 1 ? 'ST-T changes — possible reduced blood flow to heart muscle.' : 'LV hypertrophy — heart wall thickened from chronic overwork.',
+                7: `Max HR ${value}: ${value > 160 ? 'Excellent fitness — strongly protective.' : value < 120 ? 'Low capacity — possible obstruction or poor fitness.' : 'Average cardiovascular capacity.'}`,
+                8: value === 1 ? 'Chest pain with exercise — heart cannot meet oxygen demand under stress.' : 'No exercise-induced chest pain.',
+                9: `ST depression ${value}mm: ${value > 2 ? 'Severe — significantly reduced blood flow during stress.' : value > 0 ? 'Mild elevation — some cardiac stress detected.' : 'Normal ST response to exercise.'}`,
+                10: value == 2 ? 'Downsloping ST — indicates ischemia when heart works hardest.' : value == 1 ? 'Flat ST slope — borderline, reduced blood flow with exertion.' : 'Upsloping ST — healthy blood flow response to exercise.'
+            };
+            return r[idx] || '';
+        }
+
+        function renderFeatureCards() {
+            const maxWeight = Math.max(...FEATURES.map(f => Math.abs(MODEL.weights[f.idx])));
+            const container = document.getElementById('featureCards');
+
+            container.innerHTML = FEATURES.map((f, i) => {
+                const w = MODEL.weights[f.idx];
+                const pct = (Math.abs(w) / maxWeight) * 100;
+                const color = f.risk ? 'var(--accent)' : 'var(--protect)';
+                const rankClass = f.risk ? 'rank-risk' : 'rank-protect';
+                const sign = w > 0 ? '+' : '';
+
+                return `<div class="feature-card">
+      <div class="feature-header">
+        <div class="feature-rank ${rankClass}">${i + 1}</div>
+        <div>
+          <div class="feature-name">${f.icon} ${f.name}</div>
+          <div style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--serif); font-style: italic;">
+            Coefficient: ${sign}${w.toFixed(4)} · ${f.risk ? 'Risk factor' : 'Protective factor'}
+          </div>
+        </div>
+        <div style="margin-left: auto; text-align: right;">
+          <div class="feature-value" style="color: ${color};">${sign}${w.toFixed(4)}</div>
+        </div>
+      </div>
+      <div class="feature-bar-track">
+        <div class="feature-bar-fill" style="width: ${pct}%; background: ${color};"></div>
+      </div>
+      <div class="feature-explanation">
+        <div class="for-patient">
+          <strong style="color: var(--text);">For patients & families:</strong> ${f.patientText}
+        </div>
+        <div class="for-doctor">
+          <strong>For clinicians:</strong> ${f.doctorText}
+        </div>
+      </div>
+    </div>`;
+            }).join('');
+        }
+
+        // ── INIT ──
+        renderFeatureCards();
+        drawTicks();
+
+        const arc = document.getElementById('gaugeArc');
+        arc.style.strokeDasharray = `0 ${CIRC}`;
+        arc.style.strokeDashoffset = 0;
+
+        calculate();
+    </script>
+
+</body>
+
+</html>
